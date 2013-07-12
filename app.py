@@ -20,6 +20,7 @@ class Timer(NSObject):
 		if self is None: return None
 
 		self.downloader = WallpaperDownloader()
+		self.state = "STARTED"
 		return self
 
 	def applicationDidFinishLaunching_(self, notification):
@@ -41,7 +42,7 @@ class Timer(NSObject):
 		self.menu = NSMenu.alloc().init()
 	
 		# Sync event is bound to sync_ method
-		menuitem = NSMenuItem.alloc().initWithTitle_action_keyEquivalent_('Sync...', 'sync:', '')
+		menuitem = NSMenuItem.alloc().initWithTitle_action_keyEquivalent_('Sync', 'sync:', '')
 		self.menu.addItem_(menuitem)
 	
 		# Default event
@@ -52,16 +53,36 @@ class Timer(NSObject):
 		self.statusitem.setMenu_(self.menu)
 
 		# Get the timer going
-		self.timer = NSTimer.alloc().initWithFireDate_interval_target_selector_userInfo_repeats_(NSDate.date(), 60.0, self, 'tick:', None, True)
+		self.timer = NSTimer.alloc().initWithFireDate_interval_target_selector_userInfo_repeats_(NSDate.date(), 15.0, self, 'tick:', None, True)
 		NSRunLoop.currentRunLoop().addTimer_forMode_(self.timer, NSDefaultRunLoopMode)
 		self.timer.fire()
 
 	def sync_(self, notification):
-		self.downloader.download_album()
+		if self.state == "STARTED" or self.state=="ROTATE":
+			self.state = "SYNCING"
+			self.downloader.download_album()
 
 	def tick_(self, notification):
-		#change to next image
-		appscript_app("System Events").desktops[its.display_name == u"Color LCD"].picture.set("/Users/michaellittle/Desktop/imgres.jpeg")
+		print self.state
+		if self.state == "STARTED":
+			self.sync_(None)
+
+		elif self.state == "SYNCING":
+			#check if download has completed
+			if self.downloader.has_finished_downloading():
+				self.state = "DONE_SYNCING"
+				self.timer.fire()
+
+		elif self.state == "DONE_SYNCING":
+			self.wallpaper_index = 0
+			self.wallpapers = self.downloader.get_downloaded_album()
+			self.state = "ROTATE"
+			self.timer.fire()
+
+		elif self.state == "ROTATE":
+			#change to next image
+			appscript_app("System Events").desktops[its.display_name == u"Color LCD"].picture.set(self.wallpapers[self.wallpaper_index])
+			self.wallpaper_index = (self.wallpaper_index + 1) % len(self.wallpapers)
 
 
 if __name__ == "__main__":
