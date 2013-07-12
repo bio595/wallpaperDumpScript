@@ -7,20 +7,23 @@ class WallpaperDownloader(object):
 	def __init__(self):
 		self.download_dir = os.path.expanduser("~/Desktop/wallpaperdump/")
 		self.finished_downloading = False
+		self.download_progress = "0%"
 
 	def get_downloaded_album(self):
 		downloads = os.listdir(self.download_dir)
 		downloads = [self.download_dir + path for path in downloads]
-		print downloads
 		random.shuffle(downloads)
 		return downloads
 
 	def download_album(self):
 		self.finished_downloading = False
+		self.download_progress = "0%"
 		Thread(target=self.__do_download).start()
 
+	def get_download_progress(self):
+		return self.download_progress
+
 	def has_finished_downloading(self):
-		print self.finished_downloading
 		return self.finished_downloading
 
 	def __do_download(self):
@@ -45,8 +48,12 @@ class WallpaperDownloader(object):
 
 		#Could select the album by random
 		#Sort by upvotes, get the highest rated post
-		posts.sort(sortByUpvotes)
-		album_id = posts[0]['data']['url'][len("http://imgur.com/a/"):]
+		#posts.sort(sortByUpvotes)
+		album_id = posts[int(random.random() * len(posts) - 1)]['data']['url'][len("http://imgur.com/a/"):]
+		
+		#remove anchor to a specific image if it exists
+		if '#' in album_id:
+			album_id = album_id[:album_id.index('#')]
 
 		print "Quering imgur"
 		#Create a new connection object for talking to imgur api
@@ -62,15 +69,18 @@ class WallpaperDownloader(object):
 			os.makedirs(self.download_dir)
 
 		print "Number of images in album: " + str(len(images))
+		print images
 		#Download each item
 		for i, image in enumerate(images):
+
 			resp, content = http.request(image['link'], "GET")			
 			with open(self.download_dir + image['link'][len("http://i.imgur.com/"):], 'w') as f:
 				f.write(content)
-			print "Downloading " + image['link'] + "\t" + str(float(i + 1) / len(images) * 100) + "%"
+			self.download_progress = str(float(i + 1) / len(images) * 100) + "%"
+			print "Downloading " + image['link'] + "\t" + self.download_progress
 			
 		self.finished_downloading = True
-		print "Finished"
+		print "Finished downloading"
 
 
 

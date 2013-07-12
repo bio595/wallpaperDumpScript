@@ -7,7 +7,6 @@ from AppKit import *
 from PyObjCTools import NibClassBuilder, AppHelper
 
 from appscript import app as appscript_app, its
-
 from wallpaper_download import WallpaperDownloader
 
 class Timer(NSObject):
@@ -30,7 +29,9 @@ class Timer(NSObject):
 		self.statusitem = statusbar.statusItemWithLength_(NSVariableStatusItemLength).retain()
 		
 		# Set initial image
-		self.statusitem.setImage_(NSImage.alloc().initByReferencingFile_('redit-alien-small.png'))
+		self.normalImage = NSImage.alloc().initByReferencingFile_('reddit-alien-small.png')
+		self.syncingImage = NSImage.alloc().initByReferencingFile_('reddit-alien-syncing.png')
+		self.statusitem.setImage_(self.normalImage)
 		
 		#self.statusitem.setTitle_('Wall')
 		# Let it highlight upon clicking
@@ -50,20 +51,28 @@ class Timer(NSObject):
 		self.menu.addItem_(menuitem)
 	
 		# Bind it to the status item
-		self.statusitem.setMenu_(self.menu)
+		self.statusitem.setAction_(objc.selector(self.showMenu, signature='v@:'))
 
 		# Get the timer going
 		self.timer = NSTimer.alloc().initWithFireDate_interval_target_selector_userInfo_repeats_(NSDate.date(), 15.0, self, 'tick:', None, True)
 		NSRunLoop.currentRunLoop().addTimer_forMode_(self.timer, NSDefaultRunLoopMode)
 		self.timer.fire()
 
+	def showMenu(self):
+		if(self.state == "SYNCING"):
+			if self.menu.numberOfItems() == 3:
+				self.menu.removeItemAtIndex_(2)
+			progress = self.downloader.get_download_progress()
+			self.menu.addItemWithTitle_action_keyEquivalent_("Progress: " + progress, None, '')
+		self.statusitem.popUpStatusItemMenu_(self.menu)
+
 	def sync_(self, notification):
 		if self.state == "STARTED" or self.state=="ROTATE":
 			self.state = "SYNCING"
+			self.statusitem.setImage_(self.syncingImage)
 			self.downloader.download_album()
 
 	def tick_(self, notification):
-		print self.state
 		if self.state == "STARTED":
 			self.sync_(None)
 
@@ -71,6 +80,7 @@ class Timer(NSObject):
 			#check if download has completed
 			if self.downloader.has_finished_downloading():
 				self.state = "DONE_SYNCING"
+				self.statusitem.setImage_(self.normalImage)
 				self.timer.fire()
 
 		elif self.state == "DONE_SYNCING":
