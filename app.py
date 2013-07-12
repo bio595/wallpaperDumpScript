@@ -59,9 +59,9 @@ class Timer(NSObject):
 		self.timer.fire()
 
 	def showMenu(self):
+		if self.menu.numberOfItems() == 3:
+			self.menu.removeItemAtIndex_(2)
 		if(self.state == "SYNCING"):
-			if self.menu.numberOfItems() == 3:
-				self.menu.removeItemAtIndex_(2)
 			progress = self.downloader.get_download_progress()
 			self.menu.addItemWithTitle_action_keyEquivalent_("Progress: " + progress, None, '')
 		self.statusitem.popUpStatusItemMenu_(self.menu)

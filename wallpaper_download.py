@@ -49,11 +49,15 @@ class WallpaperDownloader(object):
 		#Could select the album by random
 		#Sort by upvotes, get the highest rated post
 		#posts.sort(sortByUpvotes)
-		album_id = posts[int(random.random() * len(posts) - 1)]['data']['url'][len("http://imgur.com/a/"):]
-		
+		post_index = int(random.random() * len(posts) - 1)
+		album_id = posts[post_index]['data']['url'][len("http://imgur.com/a/"):]
+		print posts[post_index]['data']['title']
+		print album_id
 		#remove anchor to a specific image if it exists
 		if '#' in album_id:
 			album_id = album_id[:album_id.index('#')]
+
+
 
 		print "Quering imgur"
 		#Create a new connection object for talking to imgur api
