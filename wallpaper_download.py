@@ -52,8 +52,7 @@ class WallpaperDownloader(object):
 		#Create a new connection object for talking to imgur api
 		http = httplib2.Http()
 		headers = {"Authorization" : "Client-ID 834426095b05c80"}
-		#url = "https://api.imgur.com/3/album/"+ album_id + "/images"
-		url = "https://api.imgur.com/3/album/Dz1UD/images"
+		url = "https://api.imgur.com/3/album/"+ album_id + "/images"
 		resp, content = http.request(url, "GET", headers=headers)
 
 		images = json.loads(content)['data']
@@ -65,11 +64,11 @@ class WallpaperDownloader(object):
 		print "Number of images in album: " + str(len(images))
 		#Download each item
 		for i, image in enumerate(images):
-			print "Downloading " + image['link'] + "\t" + str(float(i + 1) / len(images) * 100) + "%"
 			resp, content = http.request(image['link'], "GET")			
 			with open(self.download_dir + image['link'][len("http://i.imgur.com/"):], 'w') as f:
 				f.write(content)
-
+			print "Downloading " + image['link'] + "\t" + str(float(i + 1) / len(images) * 100) + "%"
+			
 		self.finished_downloading = True
 		print "Finished"
 
