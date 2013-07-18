@@ -13,13 +13,14 @@ class Timer(NSObject):
 	
 	statusbar = None
 
-	def init(self):
+	def initWithApp_(self, app):
 
 		self = super(Timer, self).init()
 		if self is None: return None
 
 		self.downloader = WallpaperDownloader()
 		self.state = "STARTED"
+		self.app = app
 		return self
 
 	def applicationDidFinishLaunching_(self, notification):
@@ -46,6 +47,9 @@ class Timer(NSObject):
 		menuitem = NSMenuItem.alloc().initWithTitle_action_keyEquivalent_('Sync', 'sync:', '')
 		self.menu.addItem_(menuitem)
 	
+		menuitem = NSMenuItem.alloc().initWithTitle_action_keyEquivalent_('Window', 'window:', '')
+		self.menu.addItem_(menuitem)
+
 		# Default event
 		menuitem = NSMenuItem.alloc().initWithTitle_action_keyEquivalent_('Quit', 'terminate:', '')
 		self.menu.addItem_(menuitem)
@@ -58,9 +62,17 @@ class Timer(NSObject):
 		NSRunLoop.currentRunLoop().addTimer_forMode_(self.timer, NSDefaultRunLoopMode)
 		self.timer.fire()
 
+	def window_(self, notification):
+		self.window = NSWindow.alloc().initWithContentRect_styleMask_backing_defer_(NSMakeRect(100, 200, 300, 400), 
+								NSBorderlessWindowMask, 
+								NSBackingStoreBuffered,
+								False)
+		self.window.setBackgroundColor_(NSColor.blueColor())
+		self.window.makeKeyAndOrderFront_(self.window)
+
 	def showMenu(self):
-		if self.menu.numberOfItems() == 3:
-			self.menu.removeItemAtIndex_(2)
+		if self.menu.numberOfItems() == 4:
+			self.menu.removeItemAtIndex_(3)
 		if(self.state == "SYNCING"):
 			progress = self.downloader.get_download_progress()
 			self.menu.addItemWithTitle_action_keyEquivalent_("Progress: " + progress, None, '')
@@ -74,7 +86,8 @@ class Timer(NSObject):
 
 	def tick_(self, notification):
 		if self.state == "STARTED":
-			self.sync_(None)
+			pass
+			#self.sync_(None)
 
 		elif self.state == "SYNCING":
 			#check if download has completed
@@ -97,6 +110,6 @@ class Timer(NSObject):
 
 if __name__ == "__main__":
 	app = NSApplication.sharedApplication()
-	delegate = Timer.alloc().init()
+	delegate = Timer.alloc().initWithApp_(app)
 	app.setDelegate_(delegate)
 	AppHelper.runEventLoop()
