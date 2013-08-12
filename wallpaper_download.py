@@ -32,7 +32,6 @@ class WallpaperDownloader(object):
 			return post_y['data']['ups'] - post_x['data']['ups']
 
 
-
 		#Find an album on /r/wallpaperdump and download it
 		print "Querying reddit"
 		http = httplib2.Http()
@@ -88,5 +87,15 @@ class WallpaperDownloader(object):
 
 
 
+def main():
+	wd = WallpaperDownloader()
+	wd.download_album()
 
+	while True:
+		print wd.get_download_progress() + "\r"
+		if wd.has_finished_downloading():
+			break
+		os.sleep(5000)
 
+if __name__ == '__main__':
+	main()
