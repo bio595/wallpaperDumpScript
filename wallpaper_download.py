@@ -72,7 +72,7 @@ class WallpaperDownloader(object):
 		for i, image in enumerate(images):
 
 			resp, content = http.request(image['link'], "GET")			
-			with open(self.download_dir + image['link'][len("http://i.imgur.com/"):], 'w') as f:
+			with open(self.download_dir + image['link'][len("http://i.imgur.com/"):], 'wb') as f:
 				f.write(content)
 			self.download_progress = str(float(i + 1) / len(images) * 100) + "%"
 			sys.stdout.write( "Downloading " + image['link'] + "\t" + self.download_progress + "\r")
