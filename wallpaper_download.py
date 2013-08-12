@@ -1,4 +1,4 @@
-import httplib2, json, os, random
+import httplib2, json, os, random, time
 from threading import Thread
 
 
@@ -60,7 +60,7 @@ class WallpaperDownloader(object):
 
 		print "Quering imgur"
 		#Create a new connection object for talking to imgur api
-		http = httplib2.Http()
+		http = httplib2.Http(disable_ssl_certificate_validation=True)
 		headers = {"Authorization" : "Client-ID 834426095b05c80"}
 		url = "https://api.imgur.com/3/album/"+ album_id + "/images"
 		resp, content = http.request(url, "GET", headers=headers)
@@ -72,7 +72,6 @@ class WallpaperDownloader(object):
 			os.makedirs(self.download_dir)
 
 		print "Number of images in album: " + str(len(images))
-		print images
 		#Download each item
 		for i, image in enumerate(images):
 
@@ -90,12 +89,6 @@ class WallpaperDownloader(object):
 def main():
 	wd = WallpaperDownloader()
 	wd.download_album()
-
-	while True:
-		print wd.get_download_progress() + "\r"
-		if wd.has_finished_downloading():
-			break
-		os.sleep(5000)
 
 if __name__ == '__main__':
 	main()
