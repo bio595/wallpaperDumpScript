@@ -1,4 +1,4 @@
-import httplib2, json, os, random, time
+import httplib2, json, os, random, time, sys
 from threading import Thread
 
 
@@ -38,11 +38,9 @@ class WallpaperDownloader(object):
 		resp, content = http.request("http://www.reddit.com/r/wallpaperdump/new.json?limit=100", "GET")
 		posts = json.loads(content)['data']['children']
 		
-
 		#Remove NSFW posts and posts that aren't imgur albums
-		for post in posts:
-			if post['data']['over_18'] or not post['data']['url'].startswith("http://imgur.com/a/"):
-				posts.remove(post)
+		posts = [post for post in posts if post['data']['over_18'] or not post['data']['url'].startswith("http://imgur.com/a/") ]
+
 
 		#Could select the album by random
 		#Sort by upvotes, get the highest rated post
@@ -54,7 +52,6 @@ class WallpaperDownloader(object):
 		#remove anchor to a specific image if it exists
 		if '#' in album_id:
 			album_id = album_id[:album_id.index('#')]
-
 
 
 		print "Quering imgur"
@@ -78,8 +75,10 @@ class WallpaperDownloader(object):
 			with open(self.download_dir + image['link'][len("http://i.imgur.com/"):], 'w') as f:
 				f.write(content)
 			self.download_progress = str(float(i + 1) / len(images) * 100) + "%"
-			print "Downloading " + image['link'] + "\t" + self.download_progress
-			
+			sys.stdout.write( "Downloading " + image['link'] + "\t" + self.download_progress + "\r")
+			sys.stdout.flush()
+		
+		print "\n"
 		self.finished_downloading = True
 		print "Finished downloading"
 
