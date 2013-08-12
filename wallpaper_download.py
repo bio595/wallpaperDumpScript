@@ -44,14 +44,13 @@ class WallpaperDownloader(object):
 			if post['data']['over_18'] or not post['data']['url'].startswith("http://imgur.com/a/"):
 				posts.remove(post)
 
-
 		#Could select the album by random
 		#Sort by upvotes, get the highest rated post
 		#posts.sort(sortByUpvotes)
 		post_index = int(random.random() * len(posts) - 1)
 		album_id = posts[post_index]['data']['url'][len("http://imgur.com/a/"):]
 		print posts[post_index]['data']['title']
-		print album_id
+		print "Album ID: " + album_id
 		#remove anchor to a specific image if it exists
 		if '#' in album_id:
 			album_id = album_id[:album_id.index('#')]
