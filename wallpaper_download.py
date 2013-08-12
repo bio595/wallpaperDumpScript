@@ -39,7 +39,7 @@ class WallpaperDownloader(object):
 		posts = json.loads(content)['data']['children']
 		
 		#Remove NSFW posts and posts that aren't imgur albums
-		posts = [post for post in posts if post['data']['over_18'] or not post['data']['url'].startswith("http://imgur.com/a/") ]
+		posts = [post for post in posts if not post['data']['over_18'] and post['data']['url'].startswith("http://imgur.com/a/") ]
 
 
 		#Could select the album by random
