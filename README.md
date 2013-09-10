@@ -9,6 +9,8 @@ A requirements.txt file is included and will install any requirements using the 
 
 `pip install -r requirements.txt`
 
+I recommend installing under a virtualenv as this was how the application was created and I don't really know that much about deploying python applications.
+
 # Running it
 
 There are three ways to use this/these scripts:
